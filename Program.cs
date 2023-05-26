@@ -24,6 +24,18 @@ namespace Graphs_Acycl
     }
     class Program
     {
+        static List<Point> Init3(List<Point> toFill)
+        {
+            toFill = new List<Point>()
+            {
+                new Point(1, new List<int>() { 3,4 })
+                ,new Point(2, new List<int>() { 1,5})
+                ,new Point(3, new List<int>() { 2 })
+                ,new Point(4, new List<int>() { 5 })
+                ,new Point(5, new List<int>() { 3 })
+            };
+            return toFill;
+        }
         static List<Point> Init2(List<Point> toFill)
         {
             toFill = new List<Point>()
@@ -57,40 +69,48 @@ namespace Graphs_Acycl
 
         static void CheckAns(ref List<string> AnsStr)
         {
-            var tempans = AnsStr.Distinct().ToList();
+            //var tempans = AnsStr.Distinct().ToList();
             if(AnsStr.Count > Ans.Count)
             {
                 Ans = new List<string>(AnsStr);
             }
         }
-        static void Shuffle_Next(ref List<Point> points, List<int> UsedPrevPoints, List<int> ToGo,ref List<string> PrevAnsStr)
+        static bool Shuffle_Next(ref List<Point> points,ref List<int> UsedPrevPoints, List<int> ToGo,ref List<string> PrevAnsStr, int PointOut)
         {
+            var checker = true;
             //var tempans = new List<string>();
             for(int i = 0; i < ToGo.Count; i++)
             {
                 //var _p = points[ToGo[i] - 1];
                 if(!UsedPrevPoints.Contains(ToGo[i]))
                 {
-                    var ansstr = new List<string>(PrevAnsStr);
-                    var usedpoints = new List<int>(UsedPrevPoints);
-                    usedpoints.Add(ToGo[i]);
-                    string tempstr = $"Number: {UsedPrevPoints[UsedPrevPoints.Count - 1]} to: {ToGo[i]}";
+                    checker = false;
+                    //var ansstr = new List<string>(PrevAnsStr);
+
+                    //var usedpoints = new List<int>(UsedPrevPoints);
                     var check = false;
-                    foreach(var s in PrevAnsStr)
+                    //usedpoints.Add(ToGo[i]);
+                    UsedPrevPoints.Add(ToGo[i]);
+                    string tempstr = $"Number: {PointOut} to: {ToGo[i]}";
+                    //string tempstr = $"Number: {UsedPrevPoints[UsedPrevPoints.Count - 2]} to: {ToGo[i]}"; //изменить превпоинты
+
+                    foreach (var s in PrevAnsStr)
                     {
-                        if(String.Compare(tempstr, s) == 0)
+                        if (String.Compare(tempstr, s) == 0)
                             check = true;
                     }
-                    if(!check)
+                    if (!check)
                         PrevAnsStr.Add(tempstr);
-
-
+                    //PrevAnsStr.Add(tempstr);
                     var _p = points[ToGo[i] - 1].OrientedTo;
-                    Shuffle_Next(ref points, usedpoints, _p,ref PrevAnsStr);
+                    var _p1 = points[ToGo[i] - 1].Number;
+                    if (Shuffle_Next(ref points, ref UsedPrevPoints, _p, ref PrevAnsStr, _p1))
+                        UsedPrevPoints.RemoveAt(UsedPrevPoints.Count - 1);
 
                     CheckAns(ref PrevAnsStr);
                 }    
             }
+            return checker;
             //return tempans;//CHANGE//CHANGE//CHANGE//CHANGE//CHANGE//CHANGE//CHANGE//CHANGE//CHANGE
         }
         //AnsStr.Add($"Number: {UsedPrevPoints[UsedPrevPoints.Count-1]} to: {ToGo[i]}");
@@ -103,7 +123,8 @@ namespace Graphs_Acycl
                 var UsedPoints = new List<int>();
                 UsedPoints.Add(points[i].Number);
                 var AnsStr = new List<string>();
-                Shuffle_Next(ref points, UsedPoints, points[i].OrientedTo,ref AnsStr);
+                var _p1 = points[i].Number;
+                Shuffle_Next(ref points,ref UsedPoints, points[i].OrientedTo,ref AnsStr, _p1);
             }
         }
 
